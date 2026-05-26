@@ -92,8 +92,6 @@ struct ContentView: View {
 struct QuickAddOverlay: View {
     @Binding var isPresented: Bool
     var dismissAction: (() -> Void)? = nil
-    
-    @State private var showCells: Bool = false
 
     private let items: [QuickAddItem] = [
         QuickAddItem(title: "亲喂", icon: "figure.and.child.holdinghands", color: .pink),
@@ -137,26 +135,6 @@ struct QuickAddOverlay: View {
                 .padding(.horizontal, 20)
                 .padding(.vertical, 20)
  
-        }
-        .onAppear {
-            if isPresented {
-                withAnimation {
-                    showCells = true
-                }
-            }
-        }
-        .onChange(of: isPresented) { oldValue, newValue in
-            if newValue {
-                withAnimation {
-                    showCells = true
-                }
-            } else {
-                DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
-                    if !isPresented {
-                        showCells = false
-                    }
-                }
-            }
         }
     }
 }

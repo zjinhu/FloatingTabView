@@ -130,7 +130,10 @@ struct MorphTabBar: View {
     @Previewable @State var activeTab: AppTab = .home
     @Previewable @State var isExpand: Bool = false
     
-    MorphTabBar(activeTab: $activeTab, isExpand: $isExpand, actions: ActionModel.dummyList) {_,_ in }
+    VStack{
+        Spacer()
+        MorphTabBar(activeTab: $activeTab, isExpand: $isExpand, actions: ActionModel.dummyList) {_,_ in }
+    }
 }
 
 

@@ -203,7 +203,7 @@ public struct FloatingTabView<SelectionValue: Hashable, Content: View>: View {
             }
         }
         .frame(maxWidth: .infinity)
-        .background(.white)
+//        .background(.white)
         .clipShape(RoundedRectangle(cornerRadius: isExpanded ? 24 : 40, style: .continuous))
         .shadow(color: .gray.opacity(0.4), radius: 3)
         .onGeometryChange(for: CGFloat.self) { proxy in
