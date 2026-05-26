@@ -81,8 +81,8 @@ struct ContentView: View {
             )
         }
         .isExpanded($showQuickAdd)
-        .trailingButton(icon: Image(systemName: "plus")) {
-            QuickAddOverlay(isPresented: $showQuickAdd)
+        .trailingButton(icon: Image(systemName: "plus")) { dismiss in
+            QuickAddOverlay(isPresented: $showQuickAdd, dismissAction: dismiss)
         }
         .themeColor(.pink)
     }
@@ -91,6 +91,9 @@ struct ContentView: View {
 // MARK: - 快速记录覆盖层
 struct QuickAddOverlay: View {
     @Binding var isPresented: Bool
+    var dismissAction: (() -> Void)? = nil
+    
+    @State private var showCells: Bool = false
 
     private let items: [QuickAddItem] = [
         QuickAddItem(title: "亲喂", icon: "figure.and.child.holdinghands", color: .pink),
@@ -110,31 +113,50 @@ struct QuickAddOverlay: View {
 
     var body: some View {
         VStack(spacing: 0) {
-            // 拖拽指示条
-            Capsule()
-                .fill(Color(.systemGray3))
-                .frame(width: 36, height: 5)
-                .padding(.top, 12)
-                .padding(.bottom, 8)
 
-            LazyVGrid(columns: columns, spacing: 16) {
-                ForEach(Array(items.enumerated()), id: \.element.id) { index, item in
-                    QuickAddCell(item: item) {
-                        withAnimation(.spring(response: 0.35, dampingFraction: 0.8)) {
-                            isPresented = false
+                LazyVGrid(columns: columns, spacing: 16) {
+                    ForEach(Array(items.enumerated()), id: \.element.id) { index, item in
+                        QuickAddCell(item: item) {
+                            if let dismissAction = dismissAction {
+                                dismissAction()
+                            } else {
+                                withAnimation(.spring(response: 0.35, dampingFraction: 0.8)) {
+                                    isPresented = false
+                                }
+                            }
                         }
-                    }
-                    .transition(
-                        .asymmetric(
-                            insertion: .scale(scale: 0.7).combined(with: .opacity)
-                                .animation(.spring(response: 0.4, dampingFraction: 0.7).delay(Double(index) * 0.03)),
-                            removal: .opacity.animation(.easeOut(duration: 0.15))
+                        .transition(
+                            .asymmetric(
+                                insertion: .scale(scale: 0.7).combined(with: .opacity)
+                                    .animation(.spring(response: 0.4, dampingFraction: 0.7).delay(Double(index) * 0.1)),
+                                removal: .opacity.animation(.easeOut(duration: 0.15))
+                            )
                         )
-                    )
+                    }
+                }
+                .padding(.horizontal, 20)
+                .padding(.vertical, 20)
+ 
+        }
+        .onAppear {
+            if isPresented {
+                withAnimation {
+                    showCells = true
                 }
             }
-            .padding(.horizontal, 20)
-            .padding(.bottom, 20)
+        }
+        .onChange(of: isPresented) { oldValue, newValue in
+            if newValue {
+                withAnimation {
+                    showCells = true
+                }
+            } else {
+                DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
+                    if !isPresented {
+                        showCells = false
+                    }
+                }
+            }
         }
     }
 }

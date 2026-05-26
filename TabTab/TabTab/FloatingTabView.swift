@@ -60,7 +60,7 @@ public struct FloatingTabView<SelectionValue: Hashable, Content: View>: View {
     private var themeColor: Color = .blue
     private var trailingIcon: Image?
     private var trailingIconHighlight: Image?
-    private var trailingMenu: AnyView?
+    private var trailingMenu: ((@escaping () -> Void) -> AnyView)?
     @Namespace private var animation
     @State private var isExpandedInternal: Bool = false
     private var isExpandedBinding: Binding<Bool>?
@@ -82,7 +82,7 @@ public struct FloatingTabView<SelectionValue: Hashable, Content: View>: View {
         selection: Binding<SelectionValue>,
         trailingIcon: Image? = nil,
         trailingIconHighlight: Image? = nil,
-        trailingMenu: AnyView? = nil,
+        trailingMenu: ((@escaping () -> Void) -> AnyView)? = nil,
         isExpandedBinding: Binding<Bool>? = nil,
         @ViewBuilder content: () -> Content
     ) {
@@ -184,7 +184,11 @@ public struct FloatingTabView<SelectionValue: Hashable, Content: View>: View {
                 ) {
                     // Content: 展开后的 menu
                     if let trailingMenu = trailingMenu {
-                        trailingMenu
+                        trailingMenu {
+                            withAnimation(.bouncy(duration: 0.5, extraBounce: 0.05)) {
+                                isExpanded = false
+                            }
+                        }
                     }
                 } label: {
                     // Label: 折叠态的 tab 按钮
@@ -256,7 +260,19 @@ public extension FloatingTabView {
         var copy = self
         copy.trailingIcon = icon
         copy.trailingIconHighlight = iconHighlight
-        copy.trailingMenu = AnyView(menu())
+        copy.trailingMenu = { _ in AnyView(menu()) }
+        return copy
+    }
+    
+    func trailingButton<MenuView: View>(
+        icon: Image,
+        iconHighlight: Image? = nil,
+        @ViewBuilder menu: @escaping (@escaping () -> Void) -> MenuView
+    ) -> FloatingTabView {
+        var copy = self
+        copy.trailingIcon = icon
+        copy.trailingIconHighlight = iconHighlight
+        copy.trailingMenu = { action in AnyView(menu(action)) }
         return copy
     }
     
@@ -267,7 +283,18 @@ public extension FloatingTabView {
         var copy = self
         copy.trailingIcon = item.icon
         copy.trailingIconHighlight = item.iconHighlight
-        copy.trailingMenu = AnyView(menu())
+        copy.trailingMenu = { _ in AnyView(menu()) }
+        return copy
+    }
+    
+    func trailingButton<T: TabItemProtocol, MenuView: View>(
+        _ item: T,
+        @ViewBuilder menu: @escaping (@escaping () -> Void) -> MenuView
+    ) -> FloatingTabView {
+        var copy = self
+        copy.trailingIcon = item.icon
+        copy.trailingIconHighlight = item.iconHighlight
+        copy.trailingMenu = { action in AnyView(menu(action)) }
         return copy
     }
     
@@ -299,12 +326,16 @@ public extension FloatingTabView {
             .floatingTabItem(TabBarItem.profile)
         
     }
-    .trailingButton(TabBarItem.add) {
+    .trailingButton(TabBarItem.add) { dismiss in
         VStack {
             Text("Expanded Menu View")
                 .font(.title)
                 .padding()
             Spacer()
+        }
+        .onTapGesture {
+            //关闭菜单
+            dismiss()
         }
         .frame(maxWidth: .infinity)
         .frame(height: 400)
