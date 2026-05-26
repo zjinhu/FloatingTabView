@@ -90,7 +90,7 @@ struct MorphTabBar: View {
     // MARK: - Actions View
     @ViewBuilder
     private var actionsView: some View {
-        GlassEffectContainer(spacing: 10) {
+        ZStack {
             LazyVGrid(
                 columns: Array(repeating: GridItem(spacing: 10), count: 4),
                 spacing: 10

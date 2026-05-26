@@ -22,8 +22,8 @@ struct MorphGlassView<Content: View, Label: View>: View, Animatable {
     
     // MARK: - View
     var body: some View {
-        GlassEffectContainer {
-            
+        ZStack {
+//        GlassEffectContainer {
             let widthDiff = contentSize.width - labelSize.width
             let heightDiff = contentSize.height - labelSize.height
             
@@ -54,8 +54,9 @@ struct MorphGlassView<Content: View, Label: View>: View, Animatable {
             }
             .compositingGroup()
             .clipShape(.rect(cornerRadius: cornerRadius))
-            .glassEffect(.regular.interactive(), in: .rect(cornerRadius: cornerRadius))
+//            .glassEffect(.regular.interactive(), in: .rect(cornerRadius: cornerRadius))
         }
+        .background(.regularMaterial, in: RoundedRectangle(cornerRadius: 30))
         .scaleEffect(
             x: 1 - (blurProgress * 0.5),
             y: 1 + (blurProgress * 0.35),
